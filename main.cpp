@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     QWidget window;
     window.setWindowTitle("Postgre connector");
     window.setMinimumWidth(1350);
-    window.setMinimumHeight(850);
+    window.setMinimumHeight(950);
     window.setStyleSheet("QWidget { background-color : rgb(235,235,235); color : black; font-size:40px}");
 
     std::string dbname;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     sucess_label.setStyleSheet("QLabel { background-color : white; color : black; font-size:40px; border: 2px solid gray; border-radius: 15px; }");
 
     QLabel open_notification{"", &window};
-    open_notification.setGeometry(350, 750, 950, 50 );
+    open_notification.setGeometry(350, 850, 950, 50 );
     open_notification.setAlignment(Qt::AlignLeft);
     open_notification.setStyleSheet("QLabel { background-color : rgb(235,235,235); color : black; font-size:40px}");
 
@@ -133,7 +133,17 @@ int main(int argc, char *argv[])
         }
     );
 
-    QPushButton print_button("Print", &window);
+
+    QLabel command_label{"Query:", &window};
+    command_label.setGeometry(0, 750, 300, 50 );
+    command_label.setAlignment(Qt::AlignRight);
+    command_label.setStyleSheet("QLabel { background-color : rgb(235,235,235); color : black; font-size:40px;}");
+
+    QLineEdit command_field(&window);
+    command_field.setGeometry(350, 750, 950, 50 );
+    command_field.setStyleSheet("QLineEdit { background-color : black; color : white; font-size:40px; border-radius: 15px; }");
+
+    QPushButton print_button("Execute", &window);
     print_button.setGeometry(350, 650, 400, 50 );
     print_button.setStyleSheet("QPushButton { background-color : grey; color : black; font-size:40px; border-radius: 15px; }");
 
@@ -145,7 +155,14 @@ int main(int argc, char *argv[])
         {
             if (C && C->is_open()) {
                 pqxx::nontransaction N(*C);
-                pqxx::result R( N.exec( "SELECT * FROM elements" ));
+
+                pqxx::result R;
+
+                if(command_field.text().isEmpty()) {
+                    R = N.exec( "SELECT * FROM elements" );
+                } else {
+                    R = N.exec( command_field.text().toStdString());
+                }
                 QString results;
 
                 for (auto row: R)
